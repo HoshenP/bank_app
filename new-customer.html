@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Customer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>New Customer</h1>
+      <div id="nav-placeholder"></div>
+      <form id="newCustomerForm">
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName" required />
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName" required />
+        <label for="customerId">Customer ID:</label>
+        <input type="text" id="customerId" name="customerId" required />
+        <button type="submit">Create Account</button>
+      </form>
+    </div>
+    <script src="bank.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        fetch("nav.html")
+          .then((response) => response.text())
+          .then((html) => {
+            document.getElementById("nav-placeholder").innerHTML = html;
+          });
+
+        document
+          .getElementById("newCustomerForm")
+          .addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent form refresh by the submit
+            const firstName = document.getElementById("firstName").value;
+            const lastName = document.getElementById("lastName").value;
+            const customerId = document.getElementById("customerId").value;
+            const message = BankAccount.createNewCustomer(
+              firstName,
+              lastName,
+              customerId
+            );
+            alert(message);
+          });
+      });
+    </script>
+  </body>
+</html>

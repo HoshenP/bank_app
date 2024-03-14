@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Existing Customer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Customer Dashboard</h1>
+        <div id="nav-placeholder"></div>
+      </header>
+      <h2>Enter Customer ID or Bank Account:</h2>
+      <form id="customerIdForm">
+        <label for="customerIdInput">Customer ID or Bank Account:</label>
+        <input type="text" id="customerIdInput" name="customerId" required />
+        <button type="button" id="submitBtn">Submit</button>
+      </form>
+      <h2>Account Balance: <span id="accountBalance">שח</span></h2>
+      <h2>Transaction History:</h2>
+      <ul id="transactionList"></ul>
+      <form id="transactionForm">
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount" required />
+        <button type="button" id="depositBtn">Deposit</button>
+        <button type="button" id="withdrawBtn">Withdraw</button>
+      </form>
+    </div>
+    <script src="bank.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        fetch("nav.html")
+          .then((response) => response.text())
+          .then((html) => {
+            document.getElementById("nav-placeholder").innerHTML = html;
+          });
+
+        document
+          .getElementById("submitBtn")
+          .addEventListener("click", function () {
+            const customerId = document.getElementById("customerIdInput").value;
+            const customer = BankAccount.getCustomerById(customerId);
+            if (!customer) {
+              alert("Customer does not exist.");
+              return;
+            }
+            updateDashboard(customer);
+          });
+
+        document
+          .getElementById("depositBtn")
+          .addEventListener("click", function () {
+            const amount = parseFloat(document.getElementById("amount").value);
+            if (!isNaN(amount) && amount > 0) {
+              const customerId =
+                document.getElementById("customerIdInput").value;
+              const customer = BankAccount.getCustomerById(customerId);
+              if (!customer) {
+                alert("Customer does not exist.");
+                return;
+              }
+              const message = customer.deposit(amount);
+              alert(message);
+              updateDashboard(customer);
+            } else {
+              alert("Invalid amount for deposit.");
+            }
+          });
+
+        // Withdraw button event listener
+        document
+          .getElementById("withdrawBtn")
+          .addEventListener("click", function () {
+            const amount = parseFloat(document.getElementById("amount").value);
+            if (!isNaN(amount) && amount > 0) {
+              const customerId =
+                document.getElementById("customerIdInput").value;
+              const customer = BankAccount.getCustomerById(customerId);
+              if (!customer) {
+                alert("Customer does not exist.");
+                return;
+              }
+              const message = customer.withdraw(amount);
+              alert(message);
+              updateDashboard(customer);
+            } else {
+              alert("Invalid amount for withdrawal.");
+            }
+          });
+
+        // Function to update dashboard after deposit or withdrawal
+        function updateDashboard(customer) {
+          document.getElementById("accountBalance").textContent =
+            customer.getBalance();
+          const transactionList = document.getElementById("transactionList");
+          transactionList.innerHTML = "";
+          customer.transactions.forEach((transaction) => {
+            const listItem = document.createElement("li");
+            listItem.textContent = `${transaction.type}: שח${transaction.amount}`;
+            transactionList.appendChild(listItem);
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

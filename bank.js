@@ -30,8 +30,6 @@ class BankAccount {
     return Math.floor(Math.random() * 90000000) + 10000000;
   }
 
-  //tcccc
-
   deposit(amount) {
     this.balance += amount;
     BankAccount.totalMoney += amount;
@@ -69,6 +67,14 @@ class BankAccount {
       transactions: this.transactions,
     });
     localStorage.setItem(`bankAccount_${this.id}`, accountData);
+
+    // Added by Hoshen - Bank Overview
+    // After each action the bank total balance and total users are being saved in the local storage
+    const bankData = JSON.stringify({
+      bankBalance: BankAccount.totalMoney,
+      bankTotalUsers: BankAccount.totalUsers,
+    });
+    localStorage.setItem(`bankData`, bankData);
   }
 
   static totalUsers = 0;
@@ -99,6 +105,60 @@ class BankAccount {
     customers.push(newCustomer);
     localStorage.setItem("bankCustomers", JSON.stringify(customers));
 
+    // Added by Hoshen - Bank Overview
+    // On creation of new user, updates bankData on local storage
+    const bankData = JSON.stringify({
+      bankBalance: BankAccount.totalMoney,
+      bankTotalUsers: BankAccount.totalUsers,
+    });
+    localStorage.setItem(`bankData`, bankData);
+
     return `Customer ${firstName} ${lastName} created successfully.`;
   }
+
+  // Added by Hoshen - Bank Overview
+  // A function that creates ListItems based on the users stored in local storage
+  static createCustomerList() {
+    const users = localStorage.getItem("bankCustomers");
+    const usersArr = JSON.parse(users);
+    const userUL = document.querySelector("#customerList");
+    usersArr.forEach((user) => {
+      const userLI = document.createElement("li");
+      // Feel free to change it in order to display different details
+      userLI.textContent = `Account: ${user.accountNumber} | Name: ${user.firstName} ${user.lastName} |  Balance: ${user.balance}`;
+      userUL.appendChild(userLI);
+    });
+  }
 }
+
+// Added by Hoshen - Bank Overview
+// On DOM load retrieves bank data from local storage and updates the text
+document.addEventListener("DOMContentLoaded", function () {
+  let bankBalance_display = document.querySelector("#bankBalance");
+  let bankTotalUsers_display = document.querySelector("#customerList");
+
+  // IRRELEVANT CODE - FOR TESTING ONLY
+  // Create new users for testing
+  BankAccount.createNewCustomer("Hoshen", "Perez", 1234);
+  BankAccount.createNewCustomer("Yogev", "Tuval", 4321);
+  BankAccount.createNewCustomer("Kobi", "Perelmuter", 5623);
+  BankAccount.createNewCustomer("Ron", "Oz", 3235);
+
+  const bankData = localStorage.getItem("bankData");
+  if (bankData) {
+    const parsedBankData = JSON.parse(bankData);
+    bankBalance_display.textContent = `${parsedBankData.bankBalance} NIS`;
+    bankTotalUsers_display.textContent = ` The bank has ${parsedBankData.bankTotalUsers} total users`;
+  } else {
+    bankBalance_display.textContent = `0 NIS`;
+    bankTotalUsers_display.textContent = `The bank has 0 users`;
+  }
+
+  // Retrieves users from local storage
+  const testBankUsers = localStorage.getItem("bankCustomers");
+  const parsedTestBankUsers = JSON.parse(testBankUsers);
+  // Console log just to see what is being stored
+  console.log(parsedTestBankUsers);
+  // Activatin the function that creates the users List Items
+  BankAccount.createCustomerList();
+});
